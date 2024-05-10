@@ -1,0 +1,104 @@
+import numpy as np
+
+def lu_decomposition(matrix):
+    n = len(matrix)
+    lower = np.zeros((n, n))
+    upper = np.zeros((n, n))
+
+    for i in range(n):
+        lower[i, i] = 1
+
+        for j in range(i, n):
+            sum = 0
+            for k in range(i):
+                sum += (lower[i, k] * upper[k, j])
+            upper[i, j] = matrix[i, j] - sum
+
+        for j in range(i + 1, n):
+            sum = 0
+            for k in range(i):
+                sum += (lower[j, k] * upper[k, i])
+            lower[j, i] = (matrix[j, i] - sum) / upper[i, i]
+
+    return lower, upper
+
+def gauss_elimination(matrix, vector):
+    n = len(matrix)
+    for i in range(n):
+        factor = matrix[i, i]
+        for j in range(i+1, n):
+            ratio = matrix[j, i] / factor
+            matrix[j] -= ratio * matrix[i]
+            vector[j] -= ratio * vector[i]
+
+    return matrix, vector
+
+def back_substitution(matrix, vector):
+    n = len(matrix)
+    x = np.zeros(n)
+    for i in range(n - 1, -1, -1):
+        x[i] = (vector[i] - np.dot(matrix[i, i+1:], x[i+1:])) / matrix[i, i]
+    return x
+
+def lu_gauss_solver(matrix, vector):
+    lower, upper = lu_decomposition(matrix)
+    matrix, vector = gauss_elimination(matrix, vector)
+    x = back_substitution(matrix, vector)
+    return x
+
+# Banner program
+print("=== PROGRAM PENYELESAIAN PERSAMAAN LINIER ====")
+print("=== RIZKY ANANTA AFADHILA - 21120122120029 ===")
+print("==== MATA KULIAH METODE NUMERIK KELAS B ======")
+
+# Input matrix A
+def input_matrix(prompt, n):
+    matrix = np.zeros((n, n))
+    print(prompt)
+    for i in range(n):
+        try:
+            row = list(map(float, input(f"Baris {i+1}: ").split()))
+            if len(row) != n:
+                print(f"Masukkan {n} nilai untuk setiap baris.")
+                return None
+            matrix[i] = row
+        except ValueError:
+            print("Masukkan bilangan bulat atau desimal.")
+            return None
+    return matrix
+
+def main():
+    metode = input("Pilih metode yang akan digunakan (1. Matriks Balikan, 2. Dekomposisi LU Gauss, 3. Dekomposisi Crout): ")
+
+    while metode not in ["1", "2", "3"]:
+        print("Masukkan salah. Pilih 1, 2, atau 3.")
+        metode = input("Pilih metode yang akan digunakan (1. Matriks Balikan, 2. Dekomposisi LU Gauss, 3. Dekomposisi Crout): ")
+
+    n = int(input("Masukkan ukuran matrix A (minimal 2, maksimal 4): "))
+    while n < 2 or n > 4:
+        print("Ukuran matrix harus minimal 2 dan maksimal 4.")
+        n = int(input("Masukkan ukuran matrix A (minimal 2, maksimal 4): "))
+
+    matrix_a = input_matrix(f"Masukkan matriks A (beri spasi pada tiap elemen) ({n}x{n}):", n)
+    while matrix_a is None:
+        matrix_a = input_matrix(f"Masukkan matriks A (beri spasi pada tiap elemen) ({n}x{n}):", n)
+
+    # Input vector B
+    vector_b = np.array(input("Masukkan vector hasil B (beri spasi pada tiap elemen) ").split()).astype(float)
+    if len(vector_b) != len(matrix_a):
+        print("Jumlah elemen vector harus sama dengan ukuran matrix A.")
+    else:
+        # Solusi
+        if metode == "1":
+            solution = lu_gauss_solver(matrix_a, vector_b)
+        elif metode == "2":
+            solution = lu_gauss_solver(matrix_a, vector_b)
+        elif metode == "3":
+            solution = lu_gauss_solver(matrix_a, vector_b)
+
+        print("Solusi:", solution)
+        for i, sol in enumerate(solution):
+            print(f"x{i+1} = {sol}")
+
+if __name__ == "__main__":
+    main()
